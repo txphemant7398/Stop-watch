@@ -1,171 +1,100 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+import math
+from tkinter import  *
 
-# C extensions
-*.so
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+# ---------------------------- CONSTANTS ------------------------------- #
+PINK = "#e2979c"
+RED = "#e7305b"
+GREEN = "#9bdeac"
+YELLOW = "#f7f5dd"
+BLACK = "#000000"
+FONT_NAME = "Courier"
+WORK_MIN = 1
+SHORT_BREAK_MIN = 1
+LONG_BREAK_MIN = 1
+resp = 0
+timer = None
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+# ---------------------------- TIMER RESET ------------------------------- #
+def reset_timer():
+    window.after_cancel(timer)
+    canvas.itemconfig(timer_text,text="00:00")
+    title_label.config(text="Timer")
+    check_mark.config(text="")
+    global resp
+    resp = 0
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+# ---------------------------- TIMER MECHANISM ------------------------------- # 
+def start_timer():
+    global resp
+    resp += 1
+    work_sec = WORK_MIN * 60
+    short_break_sec = SHORT_BREAK_MIN * 60
+    long_break_sec = LONG_BREAK_MIN * 60
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
 
-# Translations
-*.mo
-*.pot
+    if resp % 8 == 0:
+        count_down(long_break_sec)
+        title_label.config(text="BREAK",fg="RED")
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+    elif resp % 2 == 0:
+        count_down(short_break_sec)
+        title_label.config(text="BREAK", fg="PINK")
 
-# Flask stuff:
-instance/
-.webassets-cache
+    else:  # if it's the 1st,3rd,5th,7th,resp
+        count_down(work_sec)
+        title_label.config(text="WORK", fg="GREEN")
+# ---------------------------- COUNTDOWN MECHANISM ------------------------------- # 
+def count_down(count):
+    count_min = math.floor(count/60)
+    count_sec = count % 60
+    if count_sec < 10:
+        count_sec = f"0{count_sec}"
+    if count_min < 10:
+        count_min = f"0{count_min}"
 
-# Scrapy stuff:
-.scrapy
+    canvas.itemconfig(timer_text,text=f"{count_min}:{count_sec}")
+    if count >0:
+       global timer
+       timer = window.after(1000, count_down, count-1)
+    else:
+        start_timer()
+        global  resp
+        marks = ""
+        work_sesssion =math.floor(resp/2)
+        for _ in range(work_sesssion):
+            marks += "✔"
+        check_mark.config(text=marks)
 
-# Sphinx documentation
-docs/_build/
 
-# PyBuilder
-.pybuilder/
-target/
+# ---------------------------- UI SETUP ------------------------------- #
+window = Tk()
+window.title("Pomodoro")
+window.config(padx=80,pady=50,bg=YELLOW)
 
-# Jupyter Notebook
-.ipynb_checkpoints
 
-# IPython
-profile_default/
-ipython_config.py
 
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
 
-# UV
-#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#uv.lock
+title_label =Label(text="Timer",fg=GREEN,bg=YELLOW,font=(FONT_NAME,35))
+title_label.grid(column=1,row=0)
 
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
+canvas = Canvas(width=200, height=224,bg=GREEN,highlightthickness=0)
 
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
-#   in version control.
-#   https://pdm.fming.dev/latest/usage/project/#working-with-version-control
-.pdm.toml
-.pdm-python
-.pdm-build/
+tomato = PhotoImage(file="tomato.png")
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
+canvas.create_image(100,112,image = tomato)
+timer_text = canvas.create_text(100,130,text="00:00", fill="GREEN", font=(FONT_NAME,35,"bold"))
+canvas.grid(column=1, row=1)
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+check_mark = Label( fg=GREEN, bg=YELLOW)
+check_mark.grid(column=1, row=3)
 
-# SageMath parsed files
-*.sage.py
+start_button=Button(text="START", command=start_timer)
+start_button.grid(column=0,row=3)
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+reset_button= Button(text="RESET", command = reset_timer)
+reset_button.grid(column=2,row=3)
 
-# Spyder project settings
-.spyderproject
-.spyproject
 
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
-
-# PyPI configuration file
-.pypirc
+window.mainloop()
