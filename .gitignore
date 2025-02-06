@@ -26,6 +26,10 @@ def reset_timer():
 
 # ---------------------------- TIMER MECHANISM ------------------------------- # 
 def start_timer():
+
+    # Cancel any running timer before starting a new one
+    if timer is not None:
+        reset_timer()
     global resp
     resp += 1
     work_sec = WORK_MIN * 60
